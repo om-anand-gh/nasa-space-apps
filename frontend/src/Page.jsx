@@ -4,6 +4,7 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { twoline2satrec, propagate, eciToGeodetic, gstime, degreesLong, degreesLat } from 'satellite.js';
 import './App.css';
+import localImage from './assets/HalifaxZoom_543.png'; // Import your local image
 
 // Fix for default marker icon not displaying correctly
 delete L.Icon.Default.prototype._getIconUrl;
@@ -17,6 +18,7 @@ const LocationPage = () => {
   const [position, setPosition] = useState({ lat: 44.6509, lng: -63.5923 });
   const [nextPassLandsat8, setNextPassLandsat8] = useState(null);
   const [nextPassLandsat9, setNextPassLandsat9] = useState(null);
+  const [showOverlay, setShowOverlay] = useState(false);
 
   useEffect(() => {
     const fetchTLEData = async () => {
@@ -115,6 +117,20 @@ const LocationPage = () => {
       }
     }, [position]);
 
+    useEffect(() => {
+      let overlay;
+      if (showOverlay) {
+        const imageBounds = [[44.7133,  -63.6748], [44.5787, -63.3879]];
+        overlay = L.imageOverlay(localImage, imageBounds).addTo(map);
+      }
+
+      return () => {
+        if (overlay) {
+          map.removeLayer(overlay);
+        }
+      };
+    }, [map, showOverlay]);
+
     return position === null ? null : (
       <Marker position={position}>
         <Popup>
@@ -139,6 +155,18 @@ const LocationPage = () => {
         }}
       >
         Get Location via GPS
+      </button>
+      <button
+        onClick={() => setShowOverlay(!showOverlay)}
+        style={{
+          display: 'block',
+          margin: '10px auto',
+          padding: '10px 20px',
+          fontSize: '16px',
+          cursor: 'pointer',
+        }}
+      >
+        Toggle Image Overlay
       </button>
       <div style={{ textAlign: 'center', marginBottom: '10px' }}>
         <p>Latitude: {position ? position.lat.toFixed(4) : 'N/A'}</p>
