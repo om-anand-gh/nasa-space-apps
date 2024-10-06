@@ -1,0 +1,3 @@
+pystac-client
+planetary-computer
+rioxarray
