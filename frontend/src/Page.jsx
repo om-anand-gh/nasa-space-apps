@@ -120,7 +120,7 @@ const LocationPage = () => {
     useEffect(() => {
       let overlay;
       if (showOverlay) {
-        const imageBounds = [[44.7133,  -63.6748], [44.5787, -63.3879]];
+        const imageBounds = [[44.7133, -63.6748], [44.5787, -63.3879]];
         overlay = L.imageOverlay(localImage, imageBounds).addTo(map);
       }
 
@@ -142,60 +142,67 @@ const LocationPage = () => {
 
   return (
     <>
-    <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif', width: '100%', boxSizing: 'border-box' }}>
-      <h1 style={{ textAlign: 'center' }}>LANDSAT 8 & 9 Next Passes</h1>
-      <button
-        onClick={handleGetLocation}
-        style={{
-          display: 'block',
-          margin: '10px auto',
-          padding: '10px 20px',
-          fontSize: '16px',
-          cursor: 'pointer',
-        }}
-      >
-        Get Location via GPS
-      </button>
-      <button
-        onClick={() => setShowOverlay(!showOverlay)}
-        style={{
-          display: 'block',
-          margin: '10px auto',
-          padding: '10px 20px',
-          fontSize: '16px',
-          cursor: 'pointer',
-        }}
-      >
-        Toggle Image Overlay
-      </button>
-      <div style={{ textAlign: 'center', marginBottom: '10px' }}>
-        <p>Latitude: {position ? position.lat.toFixed(4) : 'N/A'}</p>
-        <p>Longitude: {position ? position.lng.toFixed(4) : 'N/A'}</p>
-      </div>
-      <div style={{ textAlign: 'center', marginBottom: '10px' }}>
-        {nextPassLandsat8 ? (
-          <p>The next pass of Landsat 8 over your location is at: {nextPassLandsat8.toLocaleString()}</p>
-        ) : (
-          <p>Calculating next pass for Landsat 8...</p>
-        )}
-        {nextPassLandsat9 ? (
-          <p>The next pass of Landsat 9 over your location is at: {nextPassLandsat9.toLocaleString()}</p>
-        ) : (
-          <p>Calculating next pass for Landsat 9...</p>
-        )}
-      </div>
-      <MapContainer
-        center={[44.6509, -63.5923]}
-        zoom={13}
-        style={{ height: '500px', minWidth: '100%', borderRadius: '8px' }}
-      >
-        <TileLayer
+      <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif', width: '100%', boxSizing: 'border-box' }}>
+        <h1 style={{ textAlign: 'center' }}>LANDSAT 8 & 9 Next Passes</h1>
+        <button
+          onClick={handleGetLocation}
+          style={{
+            display: 'block',
+            margin: '10px auto',
+            padding: '10px 20px',
+            fontSize: '16px',
+            cursor: 'pointer',
+          }}
+        >
+          Get Location via GPS
+        </button>
+        <button
+          onClick={() => setShowOverlay(!showOverlay)}
+          style={{
+            display: 'block',
+            margin: '10px auto',
+            padding: '10px 20px',
+            fontSize: '16px',
+            cursor: 'pointer',
+          }}
+        >
+          Toggle Image Overlay
+        </button>
+        <div style={{ textAlign: 'center', marginBottom: '10px' }}>
+          <p>Latitude: {position ? position.lat.toFixed(4) : 'N/A'}</p>
+          <p>Longitude: {position ? position.lng.toFixed(4) : 'N/A'}</p>
+        </div>
+        <div style={{ textAlign: 'center', marginBottom: '10px' }}>
+          {nextPassLandsat8 ? (
+            <p>The next pass of Landsat 8 over your location is at: {nextPassLandsat8.toLocaleString()}</p>
+          ) : (
+            <p>Calculating next pass for Landsat 8...</p>
+          )}
+          {nextPassLandsat9 ? (
+            <p>The next pass of Landsat 9 over your location is at: {nextPassLandsat9.toLocaleString()}</p>
+          ) : (
+            <p>Calculating next pass for Landsat 9...</p>
+          )}
+        </div>
+        <MapContainer
+          center={[44.6509, -63.5923]}
+          zoom={13}
+          style={{ height: '500px', minWidth: '100%', borderRadius: '8px' }}
+        >
+          <TileLayer
 
             url={`https://api.mapbox.com/styles/v1/mapbox/satellite-v9/tiles/{z}/{x}/{y}?access_token=pk.eyJ1Ijoib21hbmFuZCIsImEiOiJjbTF4ZnVma3AwcXBsMmlwd3E5ZGFpeW9zIn0.bnqwgmybyeSKKM6C164pKw`}
             attribution='&copy; <a href="https://www.mapbox.com/about/maps/">Mapbox</a> contributors'
           />
           <LocationMarker />
         </MapContainer>
+        <object
+          data={`https://planetarycomputer.microsoft.com/explore?c=${position.lng}%2C${position.lat}&z=14.01&v=2&d=landsat-c2-l2&s=false%3A%3A100%3A%3Atrue&ae=0&sr=desc&r=Natural+color`}
+          style={{ width: '100%', height: '500px', border: 'none', marginTop: '20px' }}
+          type="text/html"
+        >
+          Your browser does not support embedded objects.
+        </object>
       </div>
     </>
   );
