@@ -15,7 +15,8 @@ L.Icon.Default.mergeOptions({
 
 const LocationPage = () => {
   const [position, setPosition] = useState({ lat: 44.6509, lng: -63.5923 });
-  const [nextPass, setNextPass] = useState(null);
+  const [nextPassLandsat8, setNextPassLandsat8] = useState(null);
+  const [nextPassLandsat9, setNextPassLandsat9] = useState(null);
 
   useEffect(() => {
     const fetchTLEData = async () => {
@@ -24,38 +25,41 @@ const LocationPage = () => {
         const data = await response.text();
         const lines = data.split('\n');
 
-        // Find Landsat 9 TLE data
+        const calculateNextPass = (tleLine1, tleLine2) => {
+          const satrec = twoline2satrec(tleLine1, tleLine2);
+          let date = new Date();
+          let foundPass = false;
+          const swathRadius = 185 / 2; // Swath width is 185 km, radius is half
+
+          while (!foundPass) {
+            const positionAndVelocity = propagate(satrec, date);
+            const positionGd = eciToGeodetic(positionAndVelocity.position, gstime(date));
+
+            const longitude = degreesLong(positionGd.longitude);
+            const latitude = degreesLat(positionGd.latitude);
+
+            const distance = calculateDistance(latitude, longitude, position.lat, position.lng);
+
+            if (distance <= swathRadius) {
+              return date;
+            }
+
+            date.setMinutes(date.getMinutes() + 1);
+          }
+        };
+
         for (let i = 0; i < lines.length; i++) {
+          if (lines[i].includes('LANDSAT 8')) {
+            const tleLine1 = lines[i + 1].trim();
+            const tleLine2 = lines[i + 2].trim();
+            const nextPass = calculateNextPass(tleLine1, tleLine2);
+            setNextPassLandsat8(nextPass);
+          }
           if (lines[i].includes('LANDSAT 9')) {
             const tleLine1 = lines[i + 1].trim();
             const tleLine2 = lines[i + 2].trim();
-
-            const satrec = twoline2satrec(tleLine1, tleLine2);
-
-            // Calculate the next pass
-            let date = new Date();
-            let foundPass = false;
-            const swathRadius = 185 / 2; // Swath width is 185 km, radius is half
-
-            while (!foundPass) {
-              const positionAndVelocity = propagate(satrec, date);
-              const positionGd = eciToGeodetic(positionAndVelocity.position, gstime(date));
-
-              const longitude = degreesLong(positionGd.longitude);
-              const latitude = degreesLat(positionGd.latitude);
-
-              // Calculate the distance between the satellite and the specified location
-              const distance = calculateDistance(latitude, longitude, position.lat, position.lng);
-
-              if (distance <= swathRadius) {
-                setNextPass(date);
-                foundPass = true;
-              }
-
-              // Increment time by 1 minute
-              date.setMinutes(date.getMinutes() + 1);
-            }
-            break;
+            const nextPass = calculateNextPass(tleLine1, tleLine2);
+            setNextPassLandsat9(nextPass);
           }
         }
       } catch (error) {
@@ -123,7 +127,7 @@ const LocationPage = () => {
   return (
     <>
     <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif', width: '100%', boxSizing: 'border-box' }}>
-      <h1 style={{ textAlign: 'center' }}>LANDSAT 9 next pass</h1>
+      <h1 style={{ textAlign: 'center' }}>LANDSAT 8 & 9 Next Passes</h1>
       <button
         onClick={handleGetLocation}
         style={{
@@ -141,10 +145,15 @@ const LocationPage = () => {
         <p>Longitude: {position ? position.lng.toFixed(4) : 'N/A'}</p>
       </div>
       <div style={{ textAlign: 'center', marginBottom: '10px' }}>
-        {nextPass ? (
-          <p>The next pass over your location is at: {nextPass.toLocaleString()}</p>
+        {nextPassLandsat8 ? (
+          <p>The next pass of Landsat 8 over your location is at: {nextPassLandsat8.toLocaleString()}</p>
         ) : (
-          <p>Calculating next pass...</p>
+          <p>Calculating next pass for Landsat 8...</p>
+        )}
+        {nextPassLandsat9 ? (
+          <p>The next pass of Landsat 9 over your location is at: {nextPassLandsat9.toLocaleString()}</p>
+        ) : (
+          <p>Calculating next pass for Landsat 9...</p>
         )}
       </div>
       <MapContainer
