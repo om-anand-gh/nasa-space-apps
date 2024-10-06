@@ -166,7 +166,7 @@ const LocationPage = () => {
             cursor: 'pointer',
           }}
         >
-          Toggle Image Overlay
+          Toggle Composite Overlay (Bands 543)
         </button>
         <div style={{ textAlign: 'center', marginBottom: '10px' }}>
           <p>Latitude: {position ? position.lat.toFixed(4) : 'N/A'}</p>
